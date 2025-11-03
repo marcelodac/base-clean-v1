@@ -1,9 +1,12 @@
-name: "Base vRPex Clean Minimal"
-author: "Marcelo"
-description: "Base limpa do FiveM com vRPex Rework e scripts básicos."
+name: "Base vRPex Clean MG"
+author: "ChatGPT"
+description: "Base limpa FiveM com vRPex Rework, OxMySQL e scripts básicos (login, spawn e HUD)"
 version: 1.0.0
 
 tasks:
+  # ===============================
+  # DOWNLOAD DOS FRAMEWORKS
+  # ===============================
   - action: download_github
     src: "https://github.com/overextended/oxmysql"
     dest: "./resources/[system]/oxmysql"
@@ -12,6 +15,9 @@ tasks:
     src: "https://github.com/ImagicTheCat/vRP"
     dest: "./resources/[vrp]/vrp"
 
+  # ===============================
+  # DOWNLOAD DE SCRIPTS BÁSICOS
+  # ===============================
   - action: download_github
     src: "https://github.com/renzuzu/vRP_Identity"
     dest: "./resources/[vrp]/vrp_identity"
@@ -24,17 +30,75 @@ tasks:
     src: "https://github.com/renzuzu/vRP_Hud"
     dest: "./resources/[vrp]/vrp_hud"
 
+  # ===============================
+  # CRIAÇÃO DO SERVER.CFG
+  # ===============================
+  - action: write_file
+    path: "./server.cfg"
+    data: |
+      ###########################################
+      # SERVER INFO
+      ###########################################
+      endpoint_add_tcp "0.0.0.0:30120"
+      endpoint_add_udp "0.0.0.0:30120"
+      sv_hostname "Base vRPex Clean MG"
+      sv_maxclients 64
+      sv_licenseKey "COLOQUE_SUA_LICENSE_KEY_AQUI"
+      sv_enforceGameBuild 2944
+      sv_scriptHookAllowed 0
+
+      ###########################################
+      # DATABASE (OXMYSQL)
+      ###########################################
+      set mysql_connection_string "mysql://root@localhost/vrpex?charset=utf8mb4"
+
+      ###########################################
+      # RECURSOS BASE DO FIVEM
+      ###########################################
+      ensure mapmanager
+      ensure chat
+      ensure spawnmanager
+      ensure sessionmanager
+      ensure hardcap
+      ensure baseevents
+
+      ###########################################
+      # FRAMEWORK
+      ###########################################
+      ensure oxmysql
+      ensure vrp
+
+      ###########################################
+      # SCRIPTS BÁSICOS
+      ###########################################
+      ensure vrp_identity
+      ensure vrp_spawn
+      ensure vrp_hud
+
+  # ===============================
+  # CRIAÇÃO DO BANCO DE DADOS
+  # ===============================
+  - action: connect_database
+    connection_string: "mysql://root@localhost/vrpex?charset=utf8mb4"
+
+  - action: query_database
+    file: "./resources/[vrp]/vrp/sql/mysql.sql"
+
+  # ===============================
+  # VERIFICAÇÃO FINAL
+  # ===============================
   - action: ensure_resource
     resource: "oxmysql"
 
   - action: ensure_resource
     resource: "vrp"
 
-  - action: ensure_resource
-    resource: "vrp_identity"
-
-  - action: ensure_resource
-    resource: "vrp_spawn"
-
-  - action: ensure_resource
-    resource: "vrp_hud"
+  - action: write_file
+    path: "./README.txt"
+    data: |
+      ✅ Base vRPex Clean MG instalada com sucesso!
+      Banco de dados: vrpex
+      Usuário: root (sem senha)
+      Framework: vRPex Rework
+      Scripts incluídos: login, spawn, HUD
+      👉 Configure sua license key no server.cfg e inicie o servidor pelo txAdmin.
